@@ -1,9 +1,9 @@
 use winit::{
+    dpi::PhysicalSize,
     event::*,
     event_loop::{ControlFlow, EventLoop},
-    window::WindowBuilder,
-    dpi::PhysicalSize,
     window::Window,
+    window::WindowBuilder,
 };
 
 fn main() {
@@ -75,25 +75,29 @@ impl State {
         let size = window.inner_size();
         let instance = wgpu::Instance::new(wgpu::Backends::all());
         let surface = unsafe { instance.create_surface(window) };
-        let adapter = instance.request_adapter(
-            &wgpu::RequestAdapterOptions {
+        let adapter = instance
+            .request_adapter(&wgpu::RequestAdapterOptions {
                 power_preference: wgpu::PowerPreference::default(),
                 compatible_surface: Some(&surface),
                 force_fallback_adapter: false,
-            },
-        ).await.unwrap();
-        let (device, queue) = adapter.request_device(
-            &wgpu::DeviceDescriptor {
-                features: wgpu::Features::empty(),
-                limits: if cfg!(target_arch = "wasm32") {
-                    wgpu::Limits::downlevel_webgl2_defaults()
-                } else {
-                    wgpu::Limits::default()
+            })
+            .await
+            .unwrap();
+        let (device, queue) = adapter
+            .request_device(
+                &wgpu::DeviceDescriptor {
+                    features: wgpu::Features::empty(),
+                    limits: if cfg!(target_arch = "wasm32") {
+                        wgpu::Limits::downlevel_webgl2_defaults()
+                    } else {
+                        wgpu::Limits::default()
+                    },
+                    label: None,
                 },
-                label: None,
-            },
-            None, // Trace path
-        ).await.unwrap();
+                None, // Trace path
+            )
+            .await
+            .unwrap();
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: surface.get_supported_formats(&adapter)[0],
@@ -119,15 +123,18 @@ impl State {
         todo!()
     }
 
-    fn update(&mut self) {
-    }
+    fn update(&mut self) {}
 
     fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
         let output = self.surface.get_current_texture()?;
-        let view = output.texture.create_view(&wgpu::TextureViewDescriptor::default());
-        let mut encoder = self.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-            label: Some("Render Encoder"),
-        });
+        let view = output
+            .texture
+            .create_view(&wgpu::TextureViewDescriptor::default());
+        let mut encoder = self
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("Render Encoder"),
+            });
         {
             let _render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("Render Pass"),
