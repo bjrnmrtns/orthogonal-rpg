@@ -8,6 +8,26 @@ use winit::{
     window::WindowBuilder,
 };
 
+struct Transform;
+struct Collide;
+struct Move;
+
+struct Game {
+    pub world: Vec<u32>,
+    pub camera: usize,
+
+    pub window_width: u32,
+    pub window_height: u32,
+
+    pub clear_color: [u8; 4],
+
+    pub input_state: Vec<Option<bool>>,
+
+    pub transform: Vec<Option<Transform>>,
+    pub move_component: Vec<Option<Move>>, // 'move' is a reserved keyword in rust
+    pub collide: Vec<Option<Collide>>,
+}
+
 fn main() {
     pollster::block_on(run());
 }
