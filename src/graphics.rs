@@ -1,7 +1,6 @@
 use winit::{
     event::WindowEvent,
     window::Window,
-    window::WindowBuilder,
 };
 
 pub struct State {

@@ -1,35 +1,31 @@
 pub mod graphics;
+pub mod transform;
 
+use crate::transform::Transform;
 use winit::{
-    dpi::PhysicalSize,
     event::*,
     event_loop::{ControlFlow, EventLoop},
-    window::Window,
     window::WindowBuilder,
 };
 
-struct Transform;
-struct Collide;
-struct Move;
+type EntityId = usize;
 
-// every entity has an entity_id and might its data indexes in one of the components
-type entity_id = usize;
 struct Game {
-    pub world: Vec<u32>,
-    pub camera: entity_id,
-
-    pub window_width: u32,
-    pub window_height: u32,
-
-    pub clear_color: [u8; 4],
-
-    pub player: entity_id,
-
+    pub camera: EntityId,
+    pub player: EntityId,
     pub input_state: Vec<Option<bool>>,
-
     pub transform_component: Vec<Option<Transform>>,
-    pub move_component: Vec<Option<Move>>,
-    pub collide_component: Vec<Option<Collide>>,
+}
+
+impl Game {
+    pub fn new() -> Self {
+        Self {
+            camera: 0,
+            player: 1,
+            input_state: Vec::new(),
+            transform_component: Vec::new(),
+        }
+    }
 }
 
 fn main() {
@@ -37,6 +33,7 @@ fn main() {
 }
 
 pub async fn run() {
+    let game = Game::new();
     env_logger::init();
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new().build(&event_loop).unwrap();
@@ -86,4 +83,3 @@ pub async fn run() {
         _ => {}
     });
 }
-
