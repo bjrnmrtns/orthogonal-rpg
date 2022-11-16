@@ -1,43 +1,27 @@
+pub mod components;
 pub mod graphics;
+pub mod system_movement;
 pub mod transform;
 
-use crate::transform::Transform;
+use crate::components::Components;
 use winit::{
     event::*,
     event_loop::{ControlFlow, EventLoop},
     window::WindowBuilder,
 };
 
-type EntityId = usize;
-
-struct Game {
-    pub camera: EntityId,
-    pub player: EntityId,
-    pub input_state: Vec<Option<bool>>,
-    pub transform_component: Vec<Option<Transform>>,
-}
-
-impl Game {
-    pub fn new() -> Self {
-        Self {
-            camera: 0,
-            player: 1,
-            input_state: Vec::new(),
-            transform_component: Vec::new(),
-        }
-    }
-}
-
 fn main() {
     pollster::block_on(run());
 }
 
 pub async fn run() {
-    let game = Game::new();
+    let mut components = Components::new();
     env_logger::init();
     let event_loop = EventLoop::new();
     let window = WindowBuilder::new().build(&event_loop).unwrap();
     let mut state = graphics::State::new(&window).await;
+
+    system_movement::run(&mut components);
 
     event_loop.run(move |event, _, control_flow| match event {
         Event::WindowEvent {
