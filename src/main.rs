@@ -21,7 +21,7 @@ pub async fn run() {
     let window = WindowBuilder::new().build(&event_loop).unwrap();
     let mut renderer = renderer::Renderer::new(&window).await;
 
-     system_movement::run(&mut world);
+    system_movement::run(&mut world);
 
     event_loop.run(move |event, _, control_flow| match event {
         Event::WindowEvent {
