@@ -19,6 +19,18 @@ jobs:
           rust-version: stable
       - name: Build | Compile
         run: cargo check
+  check-format:
+    name: Check format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup | Checkout
+        uses: actions/checkout@v2
+      - name: Setup | Rust
+        uses: ATiltedTree/setup-rust@v1
+        with:
+          rust-version: stable
+      - name: Check format
+        run: cargo fmt -- --check
   test:
     name: Test
     strategy:

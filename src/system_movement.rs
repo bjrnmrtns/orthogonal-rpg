@@ -1,4 +1,3 @@
 use crate::World;
 
-pub fn run(world: &mut World) {
-}
+pub fn run(world: &mut World) {}
