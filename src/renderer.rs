@@ -3,7 +3,7 @@ use winit::{
     window::Window,
 };
 
-pub struct State {
+pub struct Renderer {
     surface: wgpu::Surface,
     device: wgpu::Device,
     queue: wgpu::Queue,
@@ -12,7 +12,7 @@ pub struct State {
     render_pipeline: wgpu::RenderPipeline,
 }
 
-impl State {
+impl Renderer {
     // Creating some of the wgpu types requires async code
     pub async fn new(window: &Window) -> Self {
         let size = window.inner_size();
@@ -99,8 +99,6 @@ impl State {
             multiview: None, // 5.
         });
 
-
-
         Self {
             surface,
             device,
@@ -118,13 +116,6 @@ impl State {
             self.config.height = new_size.height;
             self.surface.configure(&self.device, &self.config);
         }
-    }
-
-    pub fn input(&mut self, event: &WindowEvent) -> bool {
-        false
-    }
-
-    pub fn update(&mut self) {
     }
 
     pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {

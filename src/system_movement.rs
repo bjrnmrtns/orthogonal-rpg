@@ -1,4 +1,4 @@
-use crate::Components;
+use crate::World;
 
-pub fn run(components: &mut Components) {
+pub fn run(world: &mut World) {
 }
