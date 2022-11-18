@@ -1,18 +1,22 @@
-use winit::{event::WindowEvent, window::Window};
+use winit::window::Window;
+
+use crate::ecs;
 
 pub struct Renderer {
     surface: wgpu::Surface,
     device: wgpu::Device,
     queue: wgpu::Queue,
     config: wgpu::SurfaceConfiguration,
-    pub size: winit::dpi::PhysicalSize<u32>,
+    width: u32,
+    height: u32,
     render_pipeline: wgpu::RenderPipeline,
 }
 
 impl Renderer {
     // Creating some of the wgpu types requires async code
     pub async fn new(window: &Window) -> Self {
-        let size = window.inner_size();
+        let width = window.inner_size().width;
+        let height = window.inner_size().height;
         let instance = wgpu::Instance::new(wgpu::Backends::all());
         let surface = unsafe { instance.create_surface(window) };
         let adapter = instance
@@ -41,8 +45,8 @@ impl Renderer {
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format: surface.get_supported_formats(&adapter)[0],
-            width: size.width,
-            height: size.height,
+            width,
+            height,
             present_mode: wgpu::PresentMode::Fifo,
         };
         surface.configure(&device, &config);
@@ -103,20 +107,21 @@ impl Renderer {
             device,
             queue,
             config,
-            size,
+            width,
+            height,
             render_pipeline,
         }
     }
 
-    pub fn resize(&mut self, new_size: winit::dpi::PhysicalSize<u32>) {
-        if new_size.width > 0 && new_size.height > 0 {
-            self.size = new_size;
-            self.config.width = new_size.width;
-            self.config.height = new_size.height;
+    pub fn resize(&mut self, width: u32, height: u32) {
+        if width > 0 && height > 0 {
+            self.width = width;
+            self.height = height;
+            self.config.width = width;
+            self.config.height = height;
             self.surface.configure(&self.device, &self.config);
         }
     }
-
     pub fn render(&mut self) -> Result<(), wgpu::SurfaceError> {
         let output = self.surface.get_current_texture()?;
         let view = output
@@ -153,5 +158,25 @@ impl Renderer {
         self.queue.submit(std::iter::once(encoder.finish()));
         output.present();
         Ok(())
+    }
+
+    pub fn run(&mut self, world: &mut ecs::World) {
+        world
+            .window_events
+            .iter()
+            .for_each(|window_event| match window_event {
+                ecs::WindowEvent::Resized(width, height) => self.resize(*width, *height),
+            });
+        match self.render() {
+            Ok(_) => {}
+            // Reconfigure the surface if lost
+            Err(wgpu::SurfaceError::Lost) => {
+                self.resize(self.width, self.height);
+            }
+            // The system is out of memory, we should probably quit
+            Err(wgpu::SurfaceError::OutOfMemory) => world.renderer_outofmemory_error = true,
+            // All other errors (Outdated, Timeout) should be resolved by the next frame
+            Err(e) => eprintln!("{:?}", e),
+        }
     }
 }
